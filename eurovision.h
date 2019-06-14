@@ -2,7 +2,7 @@
 #define EUROVISION_H_
 
 #include <iostream>
-#include<String>
+#include<string>
 #include<vector>
 using namespace std;
 // it's allowed to define here any using statements, according to needs.
@@ -19,9 +19,9 @@ class Participant
 {
 // relevant private members can be defined here, if necessary.
 private:
-    String* country_name;
-    String* song_name;
-    String* singer_name;
+    string* country_name;
+    string* song_name;
+    string* singer_name;
     int song_length;
 
 
