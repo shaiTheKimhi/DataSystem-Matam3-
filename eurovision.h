@@ -19,14 +19,16 @@ class Participant
 {
 // relevant private members can be defined here, if necessary.
 private:
-    String country_name;
-    String song_name;
-    String songer_name;
+    String* country_name;
+    String* song_name;
+    String* singer_name;
     int song_length;
 
 
 public:
-
+    Participant(char* country_name, char* song_name, int time, char* singer_name)
+    ~Participant();
+    Participant operator=(Participant) = delete;
 // need to define here possibly c'tr and d'tr and ONLY methods that
 // are mentioned and demonstrated in the test example that has been published.
 // NO OTHER METHODS SHOULD APPEAR HERE.
@@ -78,14 +80,8 @@ private:
     vector<Vote> _votes;
 public:
 
-    void operator +=(Participant p)
-    {
-        //save participant to list
-    }
-    void operator +=(Vote v)
-    {
-        //save vote to votes list at contest
-    }
+    void operator +=(Participant p);//save participant to list
+    void operator +=(Vote v);//save vote to votes list at contest
 
 // need to define here possibly c'tr and d'tr and ONLY methods that
 // are mentioned and demonstrated in the test example that has been published.
