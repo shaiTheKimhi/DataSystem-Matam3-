@@ -5,6 +5,10 @@
 
 using namespace std;
 
+#define DEFAULT_MAX_PARTICIPANTS 26
+#define DEFAULT_MAX_TIME 180    
+////////////////////////////////////
+//Participant class functions:
 Participant::~Participant()
 {
     
@@ -52,16 +56,37 @@ void Participant::updateRegistered(bool r)
 }
 
 
-std::ostream& operator<<(std::ostream& os, Participant p)
+
+//ofstream operator for Participant:
+std::ostream& operator<<(std::ostream& os, Participant& p)
 {
     os << "[" << p.state() << "/" << p.song() << "/"
     << p.timeLength << "/" << p.singer() << "]"; 
     return os;
 }
-
-
-
-
+//ofstream operator for Main Control
+std::ostream& operator<<(std::ostream& os, MainControl& eur)
+{
+    Participant *temp;
+    os << eur._phase << endl;
+    if(eur._phase == Registration)
+    {
+        for(int i = 0; i < eur._participants.size(); i++)
+        {
+            temp = eur._participants[i];
+            os << "[" << temp->state() << "/" << temp->song() << "/"
+            << temp->timeLength << "/" << temp->singer() << "]" << endl;
+        }
+    }
+    else
+    {
+        //complete this to voting stage 
+    }
+    return os;
+}
+////////////////////////////////////
+////////////////////////////////////
+////////////////////////////////////
 //Vote struct functions:
 Vote* createVote(Voter voter, Participant part)
 {
@@ -74,3 +99,48 @@ void destroyVote(Vote vote)
 {
     delete vote;
 }
+
+////////////////////////////////////
+////////////////////////////////////
+////////////////////////////////////
+//MainControl class functions:
+MainControl::MainControl()
+{
+    this->_phase = Registration;
+    this->_max_participants = DEFAULT_MAX_PARTICIPANTS;
+    this->_max_time = DEFAULT_MAX_TIME;
+}
+MainControl::~MainControl()
+{
+    for(int i = 0; i < this->_participants.size(); i++)
+        delete this->_participants[i];
+    for(int i = 0; i < this->_votes.size(); i++)
+        delete this->_votes;
+}
+//checks if the state already exists in the participants vector
+bool checkStateExists(vector<Participant*> participants, string state_name)
+{
+    for(int i = 0; i < participants.size(); i++)
+    {
+        if(participants[i]->state() == state_name)
+            return true;
+    }
+    return false;
+}
+
+MainControl MainControl::operator+=(Participant& p)
+{
+    if(this->_phase != Registration)
+        return *this;
+    if(p.state() == "" || p.song() == "" || p.singer == "")
+        return *this;
+    if(this->_participants.size() == this->_max_participants)
+        return *this;
+    if(checkStateExists(this->_participants, p.state()))
+        return *this;
+    this->_participants.insert(&p);
+    p.updateRegistered(true);
+
+    return *this;
+}
+

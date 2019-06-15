@@ -89,13 +89,19 @@ class MainControl
 {
 // relevant private members can be defined here, if necessary.
 private:
-    vector<Participant> _participants;
-    vector<Vote> _votes;
+    vector<Participant*> _participants;
+    vector<Vote*> _votes;
+    Phase _phase;
+    int _max_participants;
+    int _max_time;
 public:
+    MainControl();
+    ~MainControl();
+    MainControl operator +=(Participant&);//save participant to list
+    MainControl operator +=(Vote&);//save vote to votes list at contest
 
-    void operator +=(Participant p);//save participant to list
-    void operator +=(Vote v);//save vote to votes list at contest
 
+    friend std::ostream& operator<<(std::ostream& os, MainControl& eur);
 // need to define here possibly c'tr and d'tr and ONLY methods that
 // are mentioned and demonstrated in the test example that has been published.
 // NO OTHER METHODS SHOULD APPEAR HERE.
