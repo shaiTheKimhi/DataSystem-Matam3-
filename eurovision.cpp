@@ -25,6 +25,8 @@ Participant::Participant(string country_name, string song_name, int time, string
 
 void Participant::update(string song, int length, string singer)
 {
+    if(this->_registered)
+        return;
     this->song_name = song;
     this->singer_name = singer;
     this->song_length = length;
