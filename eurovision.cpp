@@ -127,6 +127,17 @@ bool checkStateExists(vector<Participant*> participants, string state_name)
     }
     return false;
 }
+//return the index of the participant by the name of state, returns NULL if does not exist
+int getStateIndexByName(vector<Participant*> participants, string state_name)
+{
+    for(int i = 0; i < participants.size(); i++)
+    {
+        if(participants[i]->state() == state_name)
+            return i
+    }
+    return -1;
+}
+
 
 MainControl MainControl::operator+=(Participant& p)
 {
@@ -143,4 +154,27 @@ MainControl MainControl::operator+=(Participant& p)
 
     return *this;
 }
+
+MainControl MainControl::operator-=(Participant& p)
+{
+    if(this->_phase != Registration)
+        return *this;
+    if(!checkStateExists(this->_participants, p.state()))
+        return *this;
+    this->_participants.erase(this->_participants.begin() +
+     getStateIndexByName(this->_participants, p.state()));
+
+    return *this;
+}
+
+
+
+
+
+
+
+
+
+
+
 

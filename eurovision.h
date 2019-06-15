@@ -97,7 +97,8 @@ private:
 public:
     MainControl();
     ~MainControl();
-    MainControl operator +=(Participant&);//save participant to list
+    MainControl operator +=(Participant&);//register participant
+    MainControl operator -=(Participant&);//unregister participant
     MainControl operator +=(Vote&);//save vote to votes list at contest
 
 
