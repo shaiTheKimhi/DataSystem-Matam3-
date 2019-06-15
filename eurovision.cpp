@@ -141,11 +141,9 @@ int getStateIndexByName(vector<Participant*> participants, string state_name)
 
 MainControl MainControl::operator+=(Participant& p)
 {
-    if(this->_phase != Registration)
+     if(this->_phase != Registration)
         return *this;
-    if(p.state() == "" || p.song() == "" || p.singer == "")
-        return *this;
-    if(this->_participants.size() == this->_max_participants)
+    if(!this->leagalParticipant(p))
         return *this;
     if(checkStateExists(this->_participants, p.state()))
         return *this;
@@ -159,6 +157,8 @@ MainControl MainControl::operator-=(Participant& p)
 {
     if(this->_phase != Registration)
         return *this;
+    if(!this->leagalParticipant(p))
+        return *this;
     if(!checkStateExists(this->_participants, p.state()))
         return *this;
     this->_participants.erase(this->_participants.begin() +
@@ -167,7 +167,20 @@ MainControl MainControl::operator-=(Participant& p)
     return *this;
 }
 
+void MainControl::setPhase(Phase p)
+{
+    this->_phase = p;
+}
 
+bool MainControl::leagalParticipant(Participant p)
+{
+    if(p.state() == "" || p.song() == "" || p.singer == "")
+        return false;
+    if(this->_participants.size() == this->_max_participants)
+        return false;
+    return true;
+
+}
 
 
 

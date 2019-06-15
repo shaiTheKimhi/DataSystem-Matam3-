@@ -101,6 +101,8 @@ public:
     MainControl operator -=(Participant&);//unregister participant
     MainControl operator +=(Vote&);//save vote to votes list at contest
 
+    void setPhase(Phase);
+    bool leagalParticipant(Participant);
 
     friend std::ostream& operator<<(std::ostream& os, MainControl& eur);
 // need to define here possibly c'tr and d'tr and ONLY methods that
