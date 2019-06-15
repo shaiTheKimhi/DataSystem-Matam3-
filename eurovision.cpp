@@ -162,7 +162,7 @@ MainControl MainControl::operator-=(Participant& p)
     if(!checkStateExists(this->_participants, p.state()))
         return *this;
     this->_participants.erase(this->_participants.begin() +
-     getStateIndexByName(this->_participants, p.state()));
+    getStateIndexByName(this->_participants, p.state()));
 
     return *this;
 }
