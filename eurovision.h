@@ -19,16 +19,29 @@ class Participant
 {
 // relevant private members can be defined here, if necessary.
 private:
-    string* country_name;
-    string* song_name;
-    string* singer_name;
+    string country_name;
+    string song_name;
+    string singer_name;
     int song_length;
-
+    bool _registered;
 
 public:
-    Participant(char* country_name, char* song_name, int time, char* singer_name)
+    Participant(string, string, int, string)
     ~Participant();
     Participant operator=(Participant) = delete;
+
+    void update(string, int, string);
+
+    string state();
+    string song();
+    int timeLength();
+    string singer();
+    
+    bool isRegistered();
+    void updateRegistered(bool);//name might be changed if needed by test
+
+
+
 // need to define here possibly c'tr and d'tr and ONLY methods that
 // are mentioned and demonstrated in the test example that has been published.
 // NO OTHER METHODS SHOULD APPEAR HERE.
