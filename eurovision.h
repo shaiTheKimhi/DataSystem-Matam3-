@@ -57,10 +57,16 @@ class Voter
 {
 // relevant private members can be defined here, if necessary.
 private: 
-    Participant country;
-    VoterType type;
+    int votes_amount;
+    string country;
+    VoterType type;//default type is regular
 public:
-    
+    Voter(string);
+    Voter(string, VoterType);
+    string state();
+    VoterType voterType();
+    int timesOfVotes();
+    void setVotes(int);
 // need to define here possibly c'tr and d'tr and ONLY methods that
 // are mentioned and demonstrated in the test example that has been published.
 // NO OTHER METHODS SHOULD APPEAR HERE.
@@ -74,8 +80,8 @@ public:
 
 struct Vote
 {
-Voter voter;
-Participant vote_to;
+Voter& voter;
+string vote_to;
 // ALL is public here.
 // need to define ONLY data members and c'tr and d'tr.
 // NO NEED to define anything else.
@@ -89,13 +95,14 @@ class MainControl
 {
 // relevant private members can be defined here, if necessary.
 private:
-    vector<Participant*> _participants;
-    vector<Vote*> _votes;
+    vector<Participant&> _participants;
+    vector<Vote&> _votes;
     Phase _phase;
     int _max_participants;
     int _max_time;
+    int _max_votes;
 public:
-    MainControl();
+    MainControl();//should create option to set the default values
     ~MainControl();
     MainControl operator +=(Participant&);//register participant
     MainControl operator -=(Participant&);//unregister participant
@@ -103,6 +110,7 @@ public:
 
     void setPhase(Phase);
     bool leagalParticipant(Participant);
+    bool participate(string);
 
     friend std::ostream& operator<<(std::ostream& os, MainControl& eur);
 // need to define here possibly c'tr and d'tr and ONLY methods that

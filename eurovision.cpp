@@ -7,6 +7,8 @@ using namespace std;
 
 #define DEFAULT_MAX_PARTICIPANTS 26
 #define DEFAULT_MAX_TIME 180    
+#define DEFAULT_MAX_VOTES 5
+#define DEFAULT_VOTER_TYPE Regular
 ////////////////////////////////////
 //Participant class functions:
 Participant::~Participant()
@@ -66,6 +68,13 @@ std::ostream& operator<<(std::ostream& os, Participant& p)
     << p.timeLength << "/" << p.singer() << "]"; 
     return os;
 }
+//ofstream operator for Voter:
+std::ostream& operator<<(std::ostream& os, Voter& v)
+{
+    string strs[] = {"All", "Regular", "Judge"};
+    os << "[" << v.state() << "/" << strs[v.voterType()] << "]";
+    return os;
+}
 //ofstream operator for Main Control
 std::ostream& operator<<(std::ostream& os, MainControl& eur)
 {
@@ -86,20 +95,63 @@ std::ostream& operator<<(std::ostream& os, MainControl& eur)
     }
     return os;
 }
+
+////////////////////////////////////
+////////////////////////////////////
+////////////////////////////////////
+//Voter class functions:
+Voter::Voter(string state_name):Voter(state_name, DEFAULT_VOTER_TYPE)
+{
+    ////
+}
+Voter::Voter(string state_name, VoterType type)
+{
+    this->votes_amount = 0;
+    this->type = type;
+    this->country = state_name;
+}
+string Voter::state()
+{
+    return this->state_name;
+}
+VoterType Voter::voterType()
+{
+    return this->type;
+}
+
+int Voter::timesOfVotes()
+{
+    return this->votes_amount;
+}
+
+void Voter::setVotes(int v)
+{
+    this->votes_amount = v;
+}
+
+Voter operator ++(Voter& v)
+{
+    v.setVotes(v.timesOfVotes() + 1);
+    return v;
+}
+
+
+
 ////////////////////////////////////
 ////////////////////////////////////
 ////////////////////////////////////
 //Vote struct functions:
-Vote* createVote(Voter voter, Participant part)
+&Vote Vote(Voter& voter, string vote_to)
 {
     Vote* vote = new Vote;
-    vote->vote_to = part;
+    vote->vote_to = vote_to;
     vote->voter = voter;
+    return *vote
 }
 
-void destroyVote(Vote vote)
+void destroyVote(Vote& vote)
 {
-    delete vote;
+    delete &vote;
 }
 
 ////////////////////////////////////
@@ -111,6 +163,7 @@ MainControl::MainControl()
     this->_phase = Registration;
     this->_max_participants = DEFAULT_MAX_PARTICIPANTS;
     this->_max_time = DEFAULT_MAX_TIME;
+    this->_max_votes = DEFAULT_MAX_VOTES;
 }
 MainControl::~MainControl()
 {
@@ -119,7 +172,7 @@ MainControl::~MainControl()
     for(int i = 0; i < this->_votes.size(); i++)
         delete this->_votes;
 }
-//checks if the state already exists in the participants vector
+//checks if the state already exists in the participants vector(friend)
 bool checkStateExists(vector<Participant*> participants, string state_name)
 {
     for(int i = 0; i < participants.size(); i++)
@@ -129,7 +182,7 @@ bool checkStateExists(vector<Participant*> participants, string state_name)
     }
     return false;
 }
-//return the index of the participant by the name of state, returns NULL if does not exist
+//return the index of the participant by the name of state, returns NULL if does not exist(friend)
 int getStateIndexByName(vector<Participant*> participants, string state_name)
 {
     for(int i = 0; i < participants.size(); i++)
@@ -184,10 +237,38 @@ bool MainControl::leagalParticipant(Participant p)
 
 }
 
+bool MainControl::participate(string state_name)
+{
+    return checkStateExists(this->_participants, state_name);
+}
 
 
 
+//counts the times a vote appears in the votes vector(friend)
+int voteCount(vector<Vote&> votes, Vote& vote)
+{
+    int count = 0;
+    for(int i = 0; i < votes.size(); i++)
+    {
+        if(votes[i] == vote)
+            count++;
+    }
+    return count;
+}
 
+MainControl MainControl::operator+=(Vote& vote)
+{
+    //to be continued...
+    if(vote.voter.state() == vote.vote_to)
+        return *this;
+    else if(vote.timesOfVotes() == this->_max_votes && vote.type == Regular)
+        return *this;
+    else if(vote.timesOfVotes() == 1 ** vote.type == Judge)
+        return *this;
+    //to be continued...
+    ++vote;
+    this->_votes.insert(vote);
+}
 
 
 
