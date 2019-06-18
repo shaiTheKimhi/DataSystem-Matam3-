@@ -96,7 +96,8 @@ class MainControl
 // relevant private members can be defined here, if necessary.
 private:
     vector<Participant&> _participants;
-    vector<Vote&> _votes;
+    vector<Vote&> _rvotes;
+    vector<Vote&> _jvotes
     Phase _phase;
     int _max_participants;
     int _max_time;
@@ -111,6 +112,9 @@ public:
     void setPhase(Phase);
     bool leagalParticipant(Participant);
     bool participate(string);
+
+    int votesCountRegular(string);
+    int votesCountJudge(string);
 
     friend std::ostream& operator<<(std::ostream& os, MainControl& eur);
 // need to define here possibly c'tr and d'tr and ONLY methods that

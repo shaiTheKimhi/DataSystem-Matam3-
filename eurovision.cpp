@@ -78,20 +78,33 @@ std::ostream& operator<<(std::ostream& os, Voter& v)
 //ofstream operator for Main Control
 std::ostream& operator<<(std::ostream& os, MainControl& eur)
 {
-    Participant *temp;
+    Participant& temp;
     os << eur._phase << endl;
     if(eur._phase == Registration)
     {
         for(int i = 0; i < eur._participants.size(); i++)
         {
             temp = eur._participants[i];
-            os << "[" << temp->state() << "/" << temp->song() << "/"
-            << temp->timeLength << "/" << temp->singer() << "]" << endl;
+            os << "[" << temp.state() << "/" << temp.song() << "/"
+            << temp.timeLength << "/" << temp.singer() << "]";
+            if(i != eur._participants.size() - 1)
+                os << endl;
         }
     }
     else
     {
         //complete this to voting stage 
+        for(int i = 0; i < eur._participants.size(); i++)
+        {
+            temp  = eur._participants[i];
+            os << temp.state() << " : ";
+            os << "Regular(" << eur.votesCountRegular(temp.state());
+            << ") ";
+            os << "Judge(" << eur.votesCountJudge(temp.state())
+            << ")";
+            if(i != eur._participants.size() - 1)
+                os << endl;
+        }
     }
     return os;
 }
@@ -245,16 +258,38 @@ bool MainControl::participate(string state_name)
 
 
 //counts the times a vote appears in the votes vector(friend)
-int voteCount(vector<Vote&> votes, Vote& vote)
+// int voteCount(vector<Vote&> votes, Vote& vote)
+// {
+//     int count = 0;
+//     for(int i = 0; i < votes.size(); i++)
+//     {
+//         if(votes[i] == vote)
+//             count++;
+//     }
+//     return count;
+// }
+
+int MainControl::votesCountRegular(string state)
 {
     int count = 0;
-    for(int i = 0; i < votes.size(); i++)
+    for(int i = 0; i < this->_rvotes.size(); i++)
     {
-        if(votes[i] == vote)
+        if(this->_rvotes[i].state() == state)
             count++;
     }
     return count;
 }
+int MainControl::votesCountJudge(string state)
+{
+    int count = 0;
+    for(int i = 0; i < this->_jvotes.size(); i++)
+    {
+        if(this->_jvotes[i].state() == state)
+            count++;
+    }
+    return count;
+}
+
 
 MainControl MainControl::operator+=(Vote& vote)
 {
@@ -267,7 +302,10 @@ MainControl MainControl::operator+=(Vote& vote)
         return *this;
     //to be continued...
     ++vote;
-    this->_votes.insert(vote);
+    if(vote.type == Regular)
+        this->_rvotes.insert(vote);
+    else if(vote.type == Judge)
+        this->_jvotes.insert(vote);
 }
 
 
