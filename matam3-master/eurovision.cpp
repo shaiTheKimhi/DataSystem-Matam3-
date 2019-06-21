@@ -22,7 +22,7 @@ Participant::Participant(string country_name, string song_name, int time, string
     this->country_name = (country_name);
     this->song_name = (song_name);
     this->singer_name = (singer_name);
-    this->song_length = song_length;
+    this->song_length = time;
 
     this->_registered = false;
 }
@@ -67,41 +67,42 @@ void Participant::updateRegistered(bool r)
 std::ostream& operator<<(std::ostream& os, Participant& p)
 {
     os << "[" << p.state() << "/" << p.song() << "/"
-    << p.timeLength << "/" << p.singer() << "]"; 
+    << p.timeLength() << "/" << p.singer() << "]"; 
     return os;
 }
 //ofstream operator for Voter:
 std::ostream& operator<<(std::ostream& os, Voter& v)
 {
     string strs[] = {"All", "Regular", "Judge"};
-    os << "[" << v.state() << "/" << strs[v.voterType()] << "]";
+    os << "<" << v.state() << "/" << strs[v.voterType()] << ">";
     return os;
 }
 //ofstream operator for Main Control
 std::ostream& operator<<(std::ostream& os, MainControl& eur)
 {
-    os << eur._phase << endl;
     if(eur._phase == Registration)
     {
+		os << "Registration" << endl;
         for(int i = 0; i < eur._participants.size(); i++)
         {
-            Participant& temp = eur._participants[i];
-            os << "[" << temp.state() << "/" << temp.song() << "/"
-            << temp.timeLength() << "/" << temp.singer() << "]";
+            Participant* temp = eur._participants[i];
+            os << "[" << temp->state() << "/" << temp->song() << "/"
+            << temp->timeLength() << "/" << temp->singer() << "]";
             if(i != eur._participants.size() - 1)
                 os << endl;
         }
     }
     else
     {
-        //complete this to voting stage 
+        //complete this to voting stage
+		os << "Voting" << endl;
         for(int i = 0; i < eur._participants.size(); i++)
         {
-            Participant& temp  = eur._participants[i];
-            os << temp.state() << " : ";
-            os << "Regular(" << eur.votesCountRegular(temp.state())
+            Participant* temp  = eur._participants[i];
+            os << temp->state() << " : ";
+            os << "Regular(" << eur.votesCountRegular(temp->state())
             << ") ";
-            os << "Judge(" << eur.votesCountJudge(temp.state())
+            os << "Judge(" << eur.votesCountJudge(temp->state())
             << ")";
             if(i != eur._participants.size() - 1)
                 os << endl;
@@ -149,6 +150,12 @@ Voter Voter::operator ++()
 	return *this;
 }
 
+//Voter& operator ++(Voter& v)
+//{
+//	v.setVotes(v.timesOfVotes() + 1);
+//	return v;
+//}
+
 
 
 ////////////////////////////////////
@@ -156,23 +163,46 @@ Voter Voter::operator ++()
 ////////////////////////////////////
 //Vote struct functions:
 
-_Vote Vote(Voter& voter, string vote_to)
+_Vote Vote(Voter& voter, string state1, string state2, string state3, string state4, string state5, string state6 
+	, string state7, string state8, string state9, string state10 )
 {
     //_Vote vote = new struct _sVote;
 	_Vote vote = (_Vote)malloc(sizeof(struct _sVote));
-	vote->vote_to = vote_to;
-    vote->voter = voter;
+	if (voter.voterType() == Regular) {
+		vote->vote_to = new string(state1);
+		vote->voter = &voter;
+	}
+	else if (voter.voterType() == Judge)
+	{
+		vote->states_array = new string[10];
+		vote->states_array[0] = state1;
+		vote->states_array[1] = state2;
+		vote->states_array[2] = state3;
+		vote->states_array[3] = state4;
+		vote->states_array[4] = state5;
+		vote->states_array[5] = state6;
+		vote->states_array[6] = state7;
+		vote->states_array[7] = state8;
+		vote->states_array[8] = state9;
+		vote->states_array[9] = state10;
+
+		vote->voter = &voter;
+	}
+	else
+	{
+		//All type is here 
+		;
+	}
 	return vote;
 }
-_Vote Vote(Voter& voter, ...)
-{
-	//should make this function work(save points for each state)
-	va_list ap;
-	return 0;
-}
+
 
 void destroyVote(_Vote vote)
 {
+	if (vote->voter->voterType() == Judge)
+		delete vote->states_array;
+	else if (vote->voter->voterType() == Regular)
+		delete vote->vote_to;
     delete vote;
 }
 
@@ -195,21 +225,21 @@ MainControl::~MainControl()
         delete this->_rvotes[i];
 }
 //checks if the state already exists in the participants vector(friend)
-bool checkStateExists(vector<Participant&> participants, string state_name)
+bool checkStateExists(vector<Participant*> participants, string state_name)
 {
     for(int i = 0; i < participants.size(); i++)
     {
-        if(participants[i].state() == state_name)
+        if(participants[i]->state() == state_name)
             return true;
     }
     return false;
 }
 //return the index of the participant by the name of state, returns NULL if does not exist(friend)
-int getStateIndexByName(vector<Participant&> participants, string state_name)
+int getStateIndexByName(vector<Participant*> participants, string state_name)
 {
     for(int i = 0; i < participants.size(); i++)
     {
-		if (participants[i].state() == state_name)
+		if (participants[i]->state() == state_name)
 			return i;
     }
     return -1;
@@ -220,11 +250,11 @@ MainControl& MainControl::operator+=(Participant& p)
 {
      if(this->_phase != Registration)
         return *this;
-    if(!this->leagalParticipant(p))
+    if(!this->legalParticipant(p))
         return *this;
     if(checkStateExists(this->_participants, p.state()))
         return *this;
-    this->_participants.push_back(p);
+    this->_participants.push_back(&p);
     p.updateRegistered(true);
 
     return *this;
@@ -234,7 +264,7 @@ MainControl& MainControl::operator-=(Participant& p)
 {
     if(this->_phase != Registration)
         return *this;
-    if(!this->leagalParticipant(p))
+    if(!this->legalParticipant(p))
         return *this;
     if(!checkStateExists(this->_participants, p.state()))
         return *this;
@@ -249,12 +279,15 @@ void MainControl::setPhase(Phase p)
     this->_phase = p;
 }
 
-bool MainControl::leagalParticipant(Participant p)
+bool MainControl::legalParticipant(Participant p)
 {
-    if(p.state() == "" || p.song() == "" || p.singer == "")
+	string empty = "";
+    if(p.state() == empty || p.song() == empty || p.singer() == empty)
         return false;
     if(this->_participants.size() == this->_max_participants)
         return false;
+	if (p.timeLength() > this->_max_time)
+		return false;
     return true;
 
 }
@@ -283,18 +316,22 @@ int MainControl::votesCountRegular(string state)
     int count = 0;
     for(int i = 0; i < this->_rvotes.size(); i++)
     {
-        if(this->_rvotes[i]->vote_to == state)
+        if(*(this->_rvotes[i]->vote_to) == state)
             count++;
     }
     return count;
 }
 int MainControl::votesCountJudge(string state)
 {
+	int points[10] = { 12, 10, 8, 7, 6, 5, 4, 3, 2, 1 };
     int count = 0;
     for(int i = 0; i < this->_jvotes.size(); i++)
     {
-        if(this->_jvotes[i]->vote_to == state)
-            count++;
+		for (int j = 0; j < 10 && this->_jvotes[i]->states_array[j] != ""; j++)
+		{
+			if (this->_jvotes[i]->states_array[j] == state)
+				count += points[j];
+		}
     }
     return count;
 }
@@ -303,21 +340,30 @@ int MainControl::votesCountJudge(string state)
 MainControl& MainControl::operator+=(_Vote vote)
 {
     //to be continued...
-    if(vote->voter.state() == vote->vote_to)
+	
+    if(vote->voter->voterType() == Regular && vote->voter->state() == *(vote->vote_to))
         return *this;
-    else if(vote->voter.timesOfVotes() == this->_max_votes && vote->voter.voterType()== Regular)
+	if (vote->voter->voterType() == Judge)
+	{
+		for (int i = 0; i < 10; i++)//10 is the size of the judge voting araray
+		{
+			if (vote->states_array[i] == vote->voter->state())
+				return *this;
+		}
+	}
+    else if(vote->voter->timesOfVotes() >= this->_max_votes && vote->voter->voterType() == Regular)
         return *this;
-    else if(vote->voter.timesOfVotes() == 1 && vote->voter.voterType() == Judge)
+    else if(vote->voter->timesOfVotes() == 1 && vote->voter->voterType() == Judge)
         return *this;
     //to be continued...
-    ++vote;
-    if(vote->voter.voterType() == Regular)
+	++(*vote->voter);
+    if(vote->voter->voterType() == Regular)
         this->_rvotes.push_back(vote);
-    else if(vote->voter.voterType() == Judge)
+    else if(vote->voter->voterType() == Judge)
         this->_jvotes.push_back(vote);
 
 	//might remove this line
-	delete vote;
+	//destroyVote(vote); we will delete the votes when deleting the MainControl
 	return *this;
 }
 

@@ -88,8 +88,9 @@ public:
 
 typedef struct _sVote
 {
-Voter& voter;
-string vote_to;
+Voter* voter;
+string* vote_to;
+string* states_array;
 // ALL is public here.
 // need to define ONLY data members and c'tr and d'tr.
 // NO NEED to define anything else.
@@ -103,7 +104,7 @@ class MainControl
 {
 // relevant private members can be defined here, if necessary.
 private:
-    vector<Participant&> _participants;
+    vector<Participant*> _participants;
     vector<_Vote> _rvotes;
 	vector<_Vote> _jvotes;
     Phase _phase;
@@ -112,13 +113,14 @@ private:
     int _max_votes;
 public:
     MainControl();//should create option to set the default values
-    ~MainControl();
+    //MainControl(values);
+	~MainControl();
     MainControl& operator +=(Participant&);//register participant
     MainControl& operator -=(Participant&);//unregister participant
     MainControl& operator +=(_Vote);//save vote to votes list at contest
 
     void setPhase(Phase);
-    bool leagalParticipant(Participant);
+    bool legalParticipant(Participant);
     bool participate(string);
 
     int votesCountRegular(string);
@@ -141,8 +143,9 @@ std::ostream& operator<<(std::ostream& os, Participant& p);
 std::ostream& operator<<(std::ostream& os, Voter& v);
 std::ostream& operator<<(std::ostream& os, MainControl& eur);
 
-_Vote Vote(Voter& voter, string vote_to);
-_Vote Vote(Voter& voter, ... );
+_Vote Vote(Voter& voter, string state1, string state2 = "", string state3 = "", string state4 = "", string state5 = "", string state6 = ""
+	, string state7 = "", string state8 = "", string state9 = "", string state10 = "");
+//_Vote Vote(Voter& voter, ... );
 void destroyVote(_Vote vote);
 
 #endif
